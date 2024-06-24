@@ -1,11 +1,9 @@
-FROM node:14-alpine
+FROM node:lts-alpine
 
-ADD . /home/tlrtcfile
+COPY . /tlrtcfile
 
-WORKDIR /home/tlrtcfile
+WORKDIR /tlrtcfile/svr
 
-RUN npm install
+RUN npm install --registry=https://registry.npmmirror.com && npm run build:pro
 
-EXPOSE 9092 8444
-
-CMD ["/bin/sh", "docker-entrypoint.sh"]
+ENTRYPOINT ["node"]

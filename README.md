@@ -1,4 +1,4 @@
-# tl-rtc-file-tool   【始于文件传输，不止于文件传输】
+# tl-rtc-file-tool (tl webrtc file(media) tools)
 
 [![](https://img.shields.io/badge/webrtc-p2p-blue)](https://webrtc.org.cn/)
 [![](https://img.shields.io/badge/code-simple-green)](https://github.com/iamtsm/tl-rtc-file/)
@@ -6,120 +6,242 @@
 [![](https://img.shields.io/badge/deployment-private-yellow)](https://github.com/iamtsm/tl-rtc-file/)
 [![](https://img.shields.io/badge/platform-unlimited-coral)](https://github.com/iamtsm/tl-rtc-file/)
 
+<p align="center">
+<a href="https://im.iamtsm.cn/file" target="_blank">Demo</a> ｜
+<a href="https://im.iamtsm.cn/document" target="_blank">Document</a> ｜
+<a href="https://hub.docker.com/u/iamtsm" target="_blank">DockerHub</a> ｜
+<a href="https://github.com/tl-open-source/tl-rtc-file/blob/master/doc/README_ZN.md" target="_blank">中文文档</a> ｜ QQ Group:
+<a href="https://jq.qq.com/?_wv=1027&k=TKCwMBjN" target="_blank">624214498</a>
+</p>
 
-#### 背景 ： 20年毕设的题目相关整理出来的
+## Table of Contents
 
-#### 简介 ：（tl webrtc datachannel filetools）用webrt在web端传输文件，支持传输超大文件。
+- [Background](#background)
+- [Advantages](#advantages)
+- [Pre-deployment Considerations](#pre-deployment-considerations)
+- [Self-Deployment](#self-deployment)
+    - [Installing Dependencies](#installing-dependencies)
+    - [Starting the Service](#starting-the-service)
+- [Docker Deployment](#docker-deployment)
+    - [One-Click Docker Script](#one-click-docker-script)
+    - [Using docker-compose](#using-docker-compose)
+    - [Self-Building and Starting the Image](#self-building-and-starting-the-image)
+- [Other Deployment Methods](#other-deployment-methods)
+- [Configuring the Database (Optional)](#configuring-the-database-optional)
+- [Admin Panel (Optional)](#admin-panel-optional)
+- [WeChat Notifications (Optional)](#wechat-notifications-optional)
+- [OSS Cloud Storage (Optional)](#oss-cloud-storage-optional)
+- [Chat-GPT (Optional)](#chat-gpt-optional)
+- [Configuring turnserver (Optional for LAN, Required for WAN)](#configuring-turnserver-optional-for-lan-required-for-wan)
+- [Overview Diagram](#overview-diagram)
+- [License](#license)
+- [Disclaimer](#disclaimer)
 
-#### 优点 ： 分片传输，跨终端，不限平台，方便使用，内网不限速，支持私有部署，支持多文件拖拽发送
+## Background
 
-#### 扩展 ： 扩展了许多丰富的小功能，如本地屏幕录制，远程屏幕共享，远程音视频通话，密码房间，中继服务设置，webrtc检测，文字传输，公共聊天，丰富的后台管理，集成了企微机器人告警通知，实时执行日志展示... 等等
+This project was developed based on the topic of the graduation project in 2020. It allows file transfer using WebRTC in web applications and supports transferring large files.
 
-#### 说明 ： 示例网站是在公网环境中，为了更好的展示传输功能，所以默认开启了中继服务，如果各位是验证能否走p2p传输，只需关闭中继服务，且p2p检测后，如果能看到内网环境ip，webrtc连接大概率可以走p2p，跑到10M/s轻轻松松，公网环境下的内网用户一般情况下来说也会自动识别到的，如果内网速度慢，可以反馈留言，会尽快优化处理
+## Advantages
 
-#### 体验 ： https://im.iamtsm.cn/file
+Fragmented transmission, cross-platform, platform-independent, easy to use, no speed limit in the local network (up to over 70 MB/s in the LAN), supports private deployment, supports drag-and-drop sending of multiple files, web file preview. Many additional features have been added, such as local screen recording, remote screen sharing (zero-latency), remote audio and video calls (zero-latency), live streaming (zero-latency), password-protected rooms, OSS cloud storage, relay service settings, WebRTC detection, WebRTC statistics, text transmission (group chat, private chat), public chat, remote whiteboard, AI chatbox, feature-rich admin panel, real-time execution log display, robot alert notifications, and more.
 
-**qq交流群 : 624214498**
+## Pre-deployment Considerations
 
-[EN-DOC](doc/README_EN.md)
+Whether it's self-deployment, Docker deployment, or other script deployments, you need to modify the corresponding configurations in `tlrtcfile.env` before performing the following operations. Further configuration modifications and service restarts are required.
 
-## 准备
+Of course, you can also use the default configurations without modifications, but the default configurations are only suitable for testing on localhost. They won't be accessible to others, making it impossible for others to use. Therefore, if you intend to deploy on a server for local network or public network users, you must configure `tlrtcfile.env` accordingly.
 
-    安装node，npm后进入项目目录
-    
-    npm install
+## Self-Deployment
+#### Installing Dependencies
 
-    进入build目录 : cd build/webpack/  
+Install Node.js 14.21.x or above, and npm. Then, navigate to the project directory and run the following command:
+```
+cd svr/
 
-    安装一些依赖 : npm install
+npm install
+```
+For the first run, execute the following command:
+```
+npm run build:pro
+```
+If you need to develop or modify the frontend pages, use this command. If not, you can skip this step:
+```
+npm run build:dev
+```
 
+#### Starting the Service
 
-    如果需要自行开发修改res目录文件, 保持下面两个后台命令开启一个即可
+Start the following two services. Choose one mode to start. The only difference between them is that the HTTPS mode is required to use features like audio/video streaming, live streaming, and screen sharing. Other features are not affected.
 
-    npm run dev 打包开发环境min
+After starting in HTTP mode, access the service at `http://your_machine_ip:9092`.
 
-    npm run pro 打包生产环境min
+- Start the API and socket services:
+```
+npm run http-api
+npm run http-socket
+```
 
-## 测试环境 
+Or, start in HTTPS mode and access the service at `https://your_machine_ip:9092`.
 
-    启动以下两个服务
+- Start the API and socket services:
+```
+npm run https-api
+npm run https-socket
+```
 
-    本地启动file-res : npm run dev
+## Docker Deployment
 
-    本地启动file-socket : npm run devsocket
+Currently, both `official images` and `self-built images` are supported. For official images, there are two ways to operate: `docker script startup` and `docker-compose startup`.
 
-## 线上环境 （需要配置wss）
+#### One-Click Docker Script
 
-    启动以下两个服务
+Navigate to the `bin/` directory and execute the `auto-pull-and-start-docker.sh` script:
+```
+chmod +x ./auto-pull-and-start-docker.sh
+./auto-pull-and-start-docker.sh
+```
 
-    公网环境启动file-res : npm run svr 
+#### Using docker-compose
 
-    公网环境启动file-socket : npm run svrsocket
+In the main directory, execute the corresponding command based on your Docker Compose version:
 
+- For Docker Compose V1:
+```
+docker-compose --profile=http up -d
+```
 
-## 配置db
+- For Docker Compose V2:
+```
+docker compose --profile=http up -d
+```
 
-    修改conf/cfg.json中相应db配置即可, 如open, dbName, host, port, user, pwd 等
+#### Self-Building and Starting the Image
 
+Navigate to the `docker/` directory and execute the corresponding command based on your Docker Compose version:
 
-## 配置wss
+- For Docker Compose V1:
+```
+docker-compose -f docker-compose-build-code.yml up -d
+```
 
-    修改conf/cfg.json中相应ws配置即可，如port, ws_online等
+- For Docker Compose V2:
+```
+docker compose -f docker-compose-build-code.yml up -d
+```
 
+## Other Deployment Methods
 
-## 配置turnserver （私有部署）
+In addition to the manual installation, Docker official images, and self-built Docker images, there are other methods such as automatic scripts and one-click deployments on hosting platforms.
 
-    ubuntu:
+After downloading the project, navigate to the `bin/` directory and choose the appropriate system script to execute. It will automatically detect the environment, install dependencies, and start the service.
 
-    1. sudo apt-get install coturn  #安装coturn 
+#### Automatic script for Ubuntu (e.g., Ubuntu 16)
 
-    2. cp conf/turn/turnserver.conf /etc/turnserver.conf    #修改配置文件, 文件内容按需修改
+- If the script doesn't have execution permission, run the following command:
+```
+chmod +x ./ubuntu16/*.sh
+```
 
-    3. chomd +x bin/genTurnUser.sh && ./genTurnUser.sh     #文件内容按需修改
+- If using HTTP, execute this script:
+```
+./auto-check-install-http.sh
+```
 
-    4. chomd +x bin/startTurnServer.sh && ./startTurnServer.sh     #启动turnserver，文件内容按需修改
+- If using HTTPS, execute this script:
+```
+./auto-check-install-https.sh
+```
 
-## Docker
+- To stop the service:
+```
+./auto-stop.sh
+```
 
-    修改conf/cfg.json中的ws_online的ip地址（有更好的办法可以反馈下）
+#### Automatic script for Windows
 
-    docker build -t iamtsm/tl-rtc-file .
+- If using HTTP, execute this script:
+```
+windows/auto-check-install-http.bat
+```
 
-    docker run -p 9092:9092 -p 8444:8444 --name local -d iamtsm/tl-rtc-file
+- If using HTTPS, execute this script:
+```
+windows/auto-check-install-https.bat
+```
 
-    访问 : http://localhost:9092 或者 http://本机ip:9092
+#### One-Click Deployment on Zeabur Platform
 
-## 管理后台
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/898TLE?referralCode=iamtsm)
 
-    前提 ： 需要开启db配置
+## Other Configuration Options
 
-    修改conf/cfg.json中的router.manage的room和password，默认房间号和密码都是tlrtcfile
+#### Configuring the Database (Optional)
 
-    访问 : http://localhost:9092 或者 http://本机ip:9092
+You need to install MySQL database manually, create a database named `webchat`, and then modify the database-related configurations in `tlrtcfile.env`.
 
-    输入配置的房间号，输入密码，即可进入管理后台
+#### Admin Panel (Optional)
 
-    ps : 如有需要配置企业微信通知，修改conf/cfg.json中的notify的qiwei数组，填入企业微信机器人的key即可
+Prerequisite: Database configuration must be enabled.
 
-## Chat-GPT
+Modify the admin panel-related configurations in `tlrtcfile.env`. After starting, enter the configured room number and password to access the admin panel.
 
-    修改conf/cfg.json中的openai.apiKeys，填写你自己openai账号生成的apiKey
+#### WeChat Notifications (Optional)
 
-## 概述图
+If you need to set up notification for access and error alerts, you can create a WeChat Work robot and get an API key. Modify the WeChat notification configurations in `tlrtcfile.env`.
+
+#### OSS Cloud Storage (Optional)
+
+The project currently supports Seafile storage integration, and future updates will include support for Alibaba Cloud, Tencent Cloud, Qiniu Cloud, and self-hosted server storage methods. Modify the OSS storage configurations in `tlrtcfile.env`.
+
+#### Chat-GPT (Optional)
+
+Integrated with the OpenAI API, this project includes a chat dialog. Modify the OpenAI configurations in `tlrtcfile.env`.
+
+#### Configuring turnserver (Optional for LAN, Required for WAN)
+
+There are two ways to generate TURN server credentials: fixed credentials (recommended) and time-limited credentials. Choose one method. The following example uses Ubuntu.
+
+Install coturn:
+```
+sudo apt-get install coturn
+```
+
+For time-limited credentials, modify the configuration file `docker/coturn/turnserver-with-secret-user.conf`.
+
+- Modify the fields in the configuration file:
+```
+`listening-device`, `listening-ip`, `external-ip`, `static-auth-secret`, `realm`
+```
+- Start the turnserver:
+```
+turnserver -c /path/to/conf/turn/turnserver-with-secret-user.conf
+```
+
+For fixed credentials, modify the configuration file `docker/coturn/turnserver-with-fixed-user.conf`.
+
+- Modify the fields in the configuration file:
+```
+`listening-device`, `listening-ip`, `external-ip`, `user`, `realm`
+```
+- Generate a user:
+```
+turnadmin -a -u username -p password -r realm_in_config_file
+```
+- Start the turnserver:
+```
+turnserver -c /path/to/docker/coturn/turnserver-with-secret-user.conf
+```
+
+After setting up coturn, configure the WebRTC-related information in the corresponding `tlrtcfile.env` configuration.
+
+## Overview Diagram
 
 ![image](doc/tl-rtc-file-tool.jpg)
 
-
-## 引用致谢
-
-### [scroxt](https://github.com/chenjianfang/scroxt)
-
-### [layui](https://github.com/layui/layui)
-
-### [webpack](https://github.com/webpack/webpack)
-
-### [swiper](https://github.com/nolimits4web/swiper)
-
 ## License
 
-### Apache License 2.0
+### MIT License Copyright (c) 2020 ~ 2023 iamtsm
+
+## Disclaimer
+
+[Disclaimer](DISCLAIMER.md)
